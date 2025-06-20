@@ -131,16 +131,29 @@ input, textarea {
 .job-title {
   font-size: 1.5em;
   font-weight: bold;
-  margin-bottom: 10px;
   color: var(--primary-color);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  flex: 1 1 100%;
+}
+
+
+.job-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .job-company {
-  margin-bottom: 10px;
-  word-break: break-word;     /* Rompe palabras largas si es necesario */
-  overflow-wrap: anywhere;    /* Permite el salto donde sea si no hay espacios */
-  white-space: normal;        /* Asegura que pueda usar varias líneas */
+  color: var(--text-color);
+  font-size: 1em;
+  flex-shrink: 0;
 }
+
+
 
 .job-salary {
   margin-bottom: 10px;
@@ -153,6 +166,7 @@ input, textarea {
   background-color: var(--bg-color);
   border-radius: 4px;
   overflow-x: auto;
+  word-break: break-word;
 }
 
 .navigation {
