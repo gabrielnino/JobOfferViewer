@@ -21,11 +21,12 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 10px;
 }
+
 
 .top-controls {
   display: flex;
@@ -80,6 +81,7 @@ input, textarea {
 
 .job-display {
   flex-grow: 1;
+  max-height: 60vh; /* Ajusta el valor según lo que prefieras */
   overflow-y: auto;
   padding: 15px;
   background-color: var(--secondary-color);
@@ -116,6 +118,40 @@ input, textarea {
 
 .progress-container {
   margin-bottom: 10px;
+}
+
+.job-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.added-jobs {
+  background-color: var(--secondary-color);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.added-jobs h3 {
+  margin-top: 0;
+  font-size: 1.2em;
+  color: var(--primary-color);
+}
+
+.added-jobs ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.added-jobs li {
+  border-bottom: 1px solid var(--border-color);
+  padding: 4px 0;
+  font-size: 0.9em;
 }
 
 progress {
