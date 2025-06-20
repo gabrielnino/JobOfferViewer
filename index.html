@@ -20,32 +20,39 @@
         <button id="btnIncreaseFont">A+</button>
       </div>
     </div>
-    <div class="job-display">
-      <div id="placeholder" class="placeholder">Please load a JSON file to view job offers</div>
-      <div id="jobContent" class="hidden">
-        <div id="lblTitle" class="job-title"></div>
-        <div id="lblCompany" class="job-company"></div>
-        <div id="lblSalary" class="job-salary"></div>
-        <div id="txtDescription" class="job-description"></div>
-        <button id="btnApply" class="hidden">Apply Now</button>
-      </div>
-    </div>
-    <div class="navigation">
-      <button id="btnPrev">◀ Previous</button>
-      <button id="btnNext">Next ▶</button>
-    </div>
-    <div class="progress-container">
-      <progress id="progressBar" value="0" max="100"></progress>
-        <div class="job-actions">
-          <button id="btnAddJob">➕ Add Current Job</button>
-          <button id="btnDeleteJob">🗑️ Delete Current Job</button>
-          <button id="btnExportJson">📤 Export JSON</button>
+      <div class="main-layout">
+        <div class="added-jobs">
+          <h3>Added Job Offers</h3>
+          <ul id="addedJobList"></ul>
         </div>
-      <div class="added-jobs">
-        <h3>Added Job Offers</h3>
-        <ul id="addedJobList"></ul>
+        <div class="main-content">
+          <div class="job-display">
+            <div id="placeholder" class="placeholder">Please load a JSON file to view job offers</div>
+            <div id="jobContent" class="hidden">
+              <div id="lblTitle" class="job-title">
+                <span id="addedIcon" class="icon hidden">⭐</span>
+                <span id="titleText"></span>
+              </div>
+              <div id="lblCompany" class="job-company"></div>
+              <div id="lblSalary" class="job-salary"></div>
+              <div id="txtDescription" class="job-description"></div>
+              <button id="btnApply" class="hidden">Apply Now</button>
+            </div>
+          </div>
+          <div class="navigation">
+            <button id="btnPrev">◀ Previous</button>
+            <button id="btnNext">Next ▶</button>
+          </div>
+          <div class="progress-container">
+            <progress id="progressBar" value="0" max="100"></progress>
+            <div class="job-actions">
+              <button id="btnAddJob">➕ Add Current Job</button>
+              <button id="btnDeleteJob">🗑️ Delete Current Job</button>
+              <button id="btnExportJson">📤 Export JSON</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     <div id="logViewer" class="log-viewer"></div>
   </div>
 </body>
