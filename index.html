@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Offer Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="top-controls">
+      <div class="control-group">
+        <button id="btnLoad">📂 Load JSON File</button>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+      </div>
+      <div class="control-group" style="flex-grow: 1;">
+        <input type="text" id="searchField" class="search-field" placeholder="Search by keyword, company, etc.">
+      </div>
+      <div class="control-group">
+        <button id="btnDecreaseFont">A-</button>
+        <div id="lblFontSize" class="font-size-label">Font: 12pt</div>
+        <button id="btnIncreaseFont">A+</button>
+      </div>
+    </div>
+
+    <div class="job-display">
+      <div id="placeholder" class="placeholder">Please load a JSON file to view job offers</div>
+      <div id="jobContent" class="hidden">
+        <div id="lblTitle" class="job-title"></div>
+        <div id="lblCompany" class="job-company"></div>
+        <div id="lblSalary" class="job-salary"></div>
+        <div id="txtDescription" class="job-description"></div>
+        <button id="btnApply" class="hidden">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <button id="btnPrev">◀ Previous</button>
+      <button id="btnNext">Next ▶</button>
+    </div>
+
+    <div class="progress-container">
+      <progress id="progressBar" value="0" max="100"></progress>
+    </div>
+
+    <div id="logViewer" class="log-viewer"></div>
+  </div>
+
+  <script>
+    class JobViewerApp {
+      constructor() {
+        this.jobData = [];
+        this.filteredData = [];
+        this.currentIndex = -1;
+        this.fontSize = 12;
+        this.filterTimer = null;
+        this.loadSettings();
+        this.initUI();
+      }
+
+      initUI() {
+        this.elements = {
+          btnLoad: document.getElementById('btnLoad'),
+          fileInput: document.getElementById('fileInput'),
+          searchField: document.getElementById('searchField'),
+          btnDecreaseFont: document.getElementById('btnDecreaseFont'),
+          btnIncreaseFont: document.getElementById('btnIncreaseFont'),
+          lblFontSize: document.getElementById('lblFontSize'),
+          placeholder: document.getElementById('placeholder'),
+          jobContent: document.getElementById('jobContent'),
+          lblTitle: document.getElementById('lblTitle'),
+          lblCompany: document.getElementById('lblCompany'),
+          lblSalary: document.getElementById('lblSalary'),
+          txtDescription: document.getElementById('txtDescription'),
+          btnApply: document.getElementById('btnApply'),
+          btnPrev: document.getElementById('btnPrev'),
+          btnNext: document.getElementById('btnNext'),
+          progressBar: document.getElementById('progressBar'),
+          logViewer: document.getElementById('logViewer')
+        };
+
+        this.elements.btnLoad.addEventListener('click', () => this.elements.fileInput.click());
+        this.elements.fileInput.addEventListener('change', (e) => this.handleFileChange(e));
+        this.elements.searchField.addEventListener('input', () => this.applyFilter());
+        this.elements.btnDecreaseFont.addEventListener('click', () => this.decreaseFontSize());
+        this.elements.btnIncreaseFont.addEventListener('click', () => this.increaseFontSize());
+        this.elements.btnPrev.addEventListener('click', () => this.prevJob());
+        this.elements.btnNext.addEventListener('click', () => this.nextJob());
+        this.elements.btnApply.addEventListener('click', () => this.openJobLink());
+        this.updateFonts();
+      }
+
+      handleFileChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = event => {
+          try {
+            const data = JSON.parse(event.target.result);
+            if (!Array.isArray(data) || data.length === 0) {
+              throw new Error("JSON file must contain a non-empty array of job objects");
+            }
+
+            this.jobData = data;
+            this.filteredData = [...data];
+            this.currentIndex = 0;
+
+            this.elements.placeholder.classList.add('hidden');
+            this.elements.jobContent.classList.remove('hidden');
+            this.elements.btnApply.classList.add('hidden');
+
+            this.updateDisplay();
+            this.log(`✅ Loaded ${data.length} jobs from ${file.name}`);
+          } catch (error) {
+            this.log(`❌ Failed to load JSON: ${error.message}`);
+            alert(`Failed to load file: ${error.message}`);
+          }
+        };
+        reader.onerror = () => {
+          this.log(`❌ Error reading file: ${reader.error}`);
+          alert(`Error reading file: ${reader.error}`);
+        };
+        reader.readAsText(file);
+      }
+
+      applyFilter() {
+        if (this.filterTimer) clearTimeout(this.filterTimer);
+        this.filterTimer = setTimeout(() => {
+          const searchText = this.elements.searchField.value.toLowerCase();
+          if (!searchText) {
+            this.filteredData = [...this.jobData];
+          } else {
+            this.filteredData = this.jobData.filter(job =>
+              Object.values(job).some(value =>
+                String(value).toLowerCase().includes(searchText)
+              )
+            );
+          }
+          this.currentIndex = this.filteredData.length > 0 ? 0 : -1;
+          this.toggleNavigation(this.filteredData.length > 0);
+          this.updateDisplay();
+          this.log(`🔍 Applied filter → ${this.filteredData.length} matches`);
+        }, 300);
+      }
+
+      updateDisplay() {
+        if (this.filteredData.length === 0 || this.currentIndex < 0) return;
+        const job = this.filteredData[this.currentIndex];
+        this.elements.lblTitle.textContent = job.JobOfferTitle || 'No title';
+        this.elements.lblCompany.textContent = `Company: ${job.CompanyName || 'Not specified'}`;
+        const salary = job.SalaryOrBudgetOffered;
+        if (salary) {
+          this.elements.lblSalary.textContent = `Salary/Budget: ${salary}`;
+          this.elements.lblSalary.style.display = 'block';
+        } else {
+          this.elements.lblSalary.style.display = 'none';
+        }
+        this.elements.txtDescription.textContent = job.Description || 'No description available';
+        const hasLink = job.Link && job.Link.trim() !== '';
+        this.elements.btnApply.classList.toggle('hidden', !hasLink);
+        this.elements.progressBar.max = this.filteredData.length;
+        this.elements.progressBar.value = this.currentIndex + 1;
+        document.title = `Job Offer Viewer (${this.currentIndex + 1}/${this.filteredData.length})`;
+        this.toggleNavigation(true);
+      }
+
+      toggleNavigation(enabled) {
+        this.elements.btnPrev.disabled = !enabled || this.currentIndex <= 0;
+        this.elements.btnNext.disabled = !enabled || this.currentIndex >= this.filteredData.length - 1;
+      }
+
+      nextJob() {
+        if (this.currentIndex < this.filteredData.length - 1) {
+          this.currentIndex++;
+          this.updateDisplay();
+          this.log(`➡ Job ${this.currentIndex + 1}/${this.filteredData.length}`);
+        }
+      }
+
+      prevJob() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this.updateDisplay();
+          this.log(`⬅ Job ${this.currentIndex + 1}/${this.filteredData.length}`);
+        }
+      }
+
+      openJobLink() {
+        if (this.filteredData.length > 0 && this.currentIndex >= 0) {
+          const job = this.filteredData[this.currentIndex];
+          if (job.Link && job.Link.trim() !== '') {
+            window.open(job.Link, '_blank');
+            this.log(`🌐 Opened: ${job.Link}`);
+          }
+        }
+      }
+
+      updateFonts() {
+        document.body.style.fontSize = `${this.fontSize}px`;
+        this.elements.lblFontSize.textContent = `Font: ${this.fontSize}pt`;
+        this.saveSettings();
+      }
+
+      increaseFontSize() {
+        if (this.fontSize < 24) {
+          this.fontSize++;
+          this.updateFonts();
+          this.log(`🔍 Increased font size to ${this.fontSize}pt`);
+        }
+      }
+
+      decreaseFontSize() {
+        if (this.fontSize > 8) {
+          this.fontSize--;
+          this.updateFonts();
+          this.log(`🔍 Decreased font size to ${this.fontSize}pt`);
+        }
+      }
+
+      loadSettings() {
+        const savedSize = localStorage.getItem('jobViewerFontSize');
+        if (savedSize) this.fontSize = parseInt(savedSize, 10);
+      }
+
+      saveSettings() {
+        localStorage.setItem('jobViewerFontSize', this.fontSize.toString());
+      }
+
+      log(message) {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.textContent = message;
+        this.elements.logViewer.appendChild(logEntry);
+        this.elements.logViewer.scrollTop = this.elements.logViewer.scrollHeight;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { new JobViewerApp(); });
+  </script>
+</body>
+</html>
