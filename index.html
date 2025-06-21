@@ -9,54 +9,66 @@
 </head>
 <body>
   <div class="container">
-    <div class="top-controls">
+    <header class="top-controls">
       <div class="control-group">
         <button id="btnLoad">📂 Load JSON File</button>
         <input type="file" id="fileInput" accept=".json" style="display: none;">
       </div>
       <div class="control-group">
-        <button id="btnDecreaseFont">A-</button>
+        <button id="btnDecreaseFont" aria-label="Decrease Font Size">A-</button>
         <div id="lblFontSize" class="font-size-label">Font: 20pt</div>
-        <button id="btnIncreaseFont">A+</button>
+        <button id="btnIncreaseFont" aria-label="Increase Font Size">A+</button>
       </div>
       <div class="control-group">
         <button id="btnExportJson">📤 Export JSON</button>
       </div>
-    </div>
-      <div class="main-layout">
-        <div class="added-jobs">
-          <h3>Added Job Offers</h3>
-          <ul id="addedJobList"></ul>
+    </header>
+    
+    <main class="main-layout">
+      <aside class="added-jobs">
+        <h3>Added Job Offers</h3>
+        <div class="search-wrapper">
+          <input type="text" id="txtSearch" placeholder="Filter added jobs...">
         </div>
-        <div class="main-content">
-          <div class="job-display">
-            <div id="placeholder" class="placeholder">Please load a JSON file to view job offers</div>
-            <div id="jobContent" class="hidden">
+        <ul id="addedJobList"></ul>
+      </aside>
+      
+      <section class="main-content">
+        <div class="job-display">
+          <div id="placeholder" class="placeholder">
+            <h2>Welcome!</h2>
+            <p>Please load a JSON file to begin viewing job offers.</p>
+          </div>
+          <div id="jobContent" class="hidden">
             <div class="job-header">
-                <div id="lblTitle" class="job-title">
-                  <span id="addedIcon" class="icon hidden">⭐</span>
-                  <span id="titleText"></span>
-                </div>
-                <div id="lblCompany" class="job-company"></div>
+              <h2 id="lblTitle" class="job-title">
+                <span id="addedIcon" class="icon hidden" title="This job has been added">⭐</span>
+                <span id="titleText"></span>
+              </h2>
+              <div id="lblCompany" class="job-company"></div>
             </div>
             <div id="lblSalary" class="job-salary"></div>
             <div id="txtDescription" class="job-description"></div>
-            <button id="btnApply" class="hidden">Apply Now</button>
-            </div>
-          </div>
-          <div class="navigation">
-            <button id="btnPrev">◀ Previous</button>
-            <button id="btnNext">Next ▶</button>
-          </div>
-          <div class="progress-container">
-            <progress id="progressBar" value="0" max="100"></progress>
-            <div class="job-actions">
-              <button id="btnAddJob">➕ Add Current Job</button>
-              <button id="btnDeleteJob">🗑️ Delete Current Job</button>
-            </div>
+            <a id="btnApply" class="btn-apply hidden" href="#" target="_blank" rel="noopener noreferrer">Apply Now</a>
           </div>
         </div>
-      </div>
+        
+        <footer class="job-footer">
+          <div class="navigation">
+            <button id="btnPrev">◀ Previous</button>
+            <div class="progress-container">
+              <progress id="progressBar" value="0" max="100"></progress>
+              <span id="progressText">0 / 0</span>
+            </div>
+            <button id="btnNext">Next ▶</button>
+          </div>
+          <div class="job-actions">
+            <button id="btnAddJob">➕ Add Job</button>
+            <button id="btnDeleteJob" class="btn-delete">🗑️ Delete Job</button>
+          </div>
+        </footer>
+      </section>
+    </main>
   </div>
 </body>
 </html>
