@@ -21,9 +21,9 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  width: 90%;          /* Ocupar todo el ancho disponible */
+  width: 90%;
   height: 100%;
-  margin: 0 auto;       /* Puedes mantenerlo si deseas centrar contenido interno */
+  margin: 0 auto;
   padding: 10px;
 }
 
@@ -152,8 +152,6 @@ input, textarea {
   font-size: 1em;
   flex-shrink: 0;
 }
-
-
 
 .job-salary {
   margin-bottom: 10px;
