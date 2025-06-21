@@ -26,7 +26,6 @@ class JobViewerApp {
       btnPrev: document.getElementById('btnPrev'),
       btnNext: document.getElementById('btnNext'),
       progressBar: document.getElementById('progressBar'),
-      logViewer: document.getElementById('logViewer'),
       btnAddJob: document.getElementById('btnAddJob'),
       btnDeleteJob: document.getElementById('btnDeleteJob'),
       btnExportJson: document.getElementById('btnExportJson'),
@@ -178,8 +177,6 @@ class JobViewerApp {
     const logEntry = document.createElement('div');
     logEntry.className = 'log-entry';
     logEntry.textContent = message;
-    this.elements.logViewer.appendChild(logEntry);
-    this.elements.logViewer.scrollTop = this.elements.logViewer.scrollHeight;
   }
 
   addCurrentJob() {

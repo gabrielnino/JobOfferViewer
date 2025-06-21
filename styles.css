@@ -120,7 +120,7 @@ input, textarea {
 
 .job-display {
   flex-grow: 1;
-  max-height: 60vh;
+  max-height: 65vh;
   overflow-y: auto;
   padding: 15px;
   background-color: var(--secondary-color);
