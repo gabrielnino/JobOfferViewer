@@ -59,7 +59,6 @@ class JobViewerApp {
         if (!Array.isArray(data) || data.length === 0) {
           throw new Error("JSON file must contain a non-empty array of job objects");
         }
-
         this.jobData = data;
         this.currentIndex = 0;
         this.elements.placeholder.classList.add('hidden');
@@ -92,9 +91,7 @@ class JobViewerApp {
   updateDisplay() {
     if (this.jobData.length === 0 || this.currentIndex < 0) return;
     const job = this.jobData[this.currentIndex];
-
     this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
-
     const existsInFiltered = this.filteredData.some(j => j.Id === job.Id);
     this.elements.addedIcon.classList.toggle('hidden', !existsInFiltered);
     this.elements.btnDeleteJob.classList.toggle('hidden', !existsInFiltered);
@@ -107,13 +104,10 @@ class JobViewerApp {
       this.elements.lblSalary.style.display = 'none';
     }
     this.elements.txtDescription.textContent = job.Description || 'No description available';
-
     const hasLink = job.Link && job.Link.trim() !== '';
     this.elements.btnApply.classList.toggle('hidden', !hasLink);
-
     this.elements.progressBar.max = this.jobData.length;
     this.elements.progressBar.value = this.currentIndex + 1;
-
     document.title = `Job Offer Viewer (${this.currentIndex + 1}/${this.jobData.length})`;
     this.toggleNavigation(true);
   }
@@ -205,15 +199,12 @@ class JobViewerApp {
       alert("No job to delete.");
       return;
     }
-
     const jobToDelete = this.jobData[this.currentIndex];
     const jobId = jobToDelete.Id;
     // Remove from filteredData
     this.filteredData = this.filteredData.filter(job => job.Id !== jobId);
-
     this.updateAddedJobList();
     this.log(`🗑️ Deleted job with Id: ${jobId}`);
-
     if (this.currentIndex >= this.jobData.length) {
       this.currentIndex = this.jobData.length - 1;
     }
@@ -224,7 +215,6 @@ class JobViewerApp {
     const dataStr = JSON.stringify(this.filteredData, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement('a');
     a.href = url;
     a.download = "job_offers.json";
@@ -232,7 +222,6 @@ class JobViewerApp {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
     this.log("📤 Exported job data as JSON.");
   }
 }
