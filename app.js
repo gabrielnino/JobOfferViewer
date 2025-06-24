@@ -49,7 +49,9 @@ class JobViewerApp {
     this.elements.btnDeleteJob.addEventListener('click', () => this.deleteCurrentJob());
     this.elements.btnExportJson.addEventListener('click', () => this.exportJson());
     this.elements.txtSearch.addEventListener('input', () => this.filterAddedJobs());
-    
+    this.elements.btnAddJob.classList.add('hidden');
+    this.elements.btnDeleteJob.classList.add('hidden');
+    this.elements.addedIcon.classList.add('hidden');
     this.updateFonts();
   }
 
@@ -114,6 +116,12 @@ class JobViewerApp {
     }
   }
 
+  showButtons(isAdded) {
+    this.elements.addedIcon.classList.toggle('hidden', !isAdded);
+    this.elements.btnDeleteJob.classList.toggle('hidden', !isAdded);
+    this.elements.btnAddJob.classList.toggle('hidden', isAdded);
+  }
+
   updateDisplay() {
     if (this.allJobs.length === 0 || this.currentIndex === -1) {
       this.elements.progressText.textContent = `0 / 0`;
@@ -126,12 +134,8 @@ class JobViewerApp {
     this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
     this.elements.lblCompany.textContent = `Company: ${job.CompanyName || 'Not specified'}`;
     this.elements.txtDescription.textContent = job.Description || 'No description available';
-    
     const isAdded = this.addedJobs.some(j => j.Id === job.Id);
-    this.elements.addedIcon.classList.toggle('hidden', !isAdded);
-    this.elements.btnDeleteJob.classList.toggle('hidden', !isAdded);
-    this.elements.btnAddJob.classList.toggle('hidden', isAdded);
-
+    
     const hasLink = job.Link && job.Link.trim() !== '';
     this.elements.btnApply.classList.toggle('hidden', !hasLink);
     if(hasLink) this.elements.btnApply.href = job.Link;
@@ -141,6 +145,7 @@ class JobViewerApp {
     this.elements.progressText.textContent = `${this.currentIndex + 1} / ${this.allJobs.length}`;
     document.title = `Job Viewer (${this.currentIndex + 1}/${this.allJobs.length})`;
     this.toggleNavigation(true);
+    this.showButtons(isAdded);
   }
 
   toggleNavigation(enabled) {
