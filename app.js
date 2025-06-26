@@ -1,11 +1,16 @@
 class JobViewerApp {
   constructor() {
+    // --- STATE ---
     this.allJobs = []; // All jobs from the loaded JSON
-    this.addedJobs = []; // Jobs the user has added
+    this.addedJobs = []; // Full job objects the user has added
     this.displayedAddedJobs = []; // Jobs visible in the sidebar (after filtering)
-    this.currentIndex = -1;
+    this.currentJobId = null; // Use job ID to track the current job instead of index
     this.fontSize = 20;
+
+    // --- HELPERS ---
     this.filterTimer = null;
+
+    // --- INITIALIZATION ---
     this.loadSettings();
     this.bindUI();
   }
@@ -49,6 +54,8 @@ class JobViewerApp {
     this.elements.btnDeleteJob.addEventListener('click', () => this.deleteCurrentJob());
     this.elements.btnExportJson.addEventListener('click', () => this.exportJson());
     this.elements.txtSearch.addEventListener('input', () => this.filterAddedJobs());
+
+    // Initial UI state
     this.elements.btnAddJob.classList.add('hidden');
     this.elements.btnDeleteJob.classList.add('hidden');
     this.elements.addedIcon.classList.add('hidden');
@@ -63,20 +70,22 @@ class JobViewerApp {
     reader.onload = event => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!Array.isArray(data)) {
-          throw new Error("JSON file must be an array.");
+        if (!Array.isArray(data) || (data.length > 0 && typeof data[0].ID === 'undefined')) {
+          throw new Error("JSON must be an array of objects, and each object must have a unique 'ID' property.");
         }
+
         this.allJobs = data;
-        this.currentIndex = data.length > 0 ? 0 : -1;
-        
-        if (this.currentIndex !== -1) {
-            this.elements.placeholder.classList.add('hidden');
-            this.elements.jobContent.classList.remove('hidden');
+        // Set the current job to the ID of the first job, or null if empty
+        this.currentJobId = data.length > 0 ? data[0].ID : null;
+
+        if (this.currentJobId !== null) {
+          this.elements.placeholder.classList.add('hidden');
+          this.elements.jobContent.classList.remove('hidden');
         } else {
-            this.elements.placeholder.classList.remove('hidden');
-            this.elements.jobContent.classList.add('hidden');
+          this.elements.placeholder.classList.remove('hidden');
+          this.elements.jobContent.classList.add('hidden');
         }
-        
+
         this.updateDisplay();
         console.log(`Loaded ${data.length} jobs from ${file.name}`);
       } catch (error) {
@@ -98,20 +107,21 @@ class JobViewerApp {
       ul.appendChild(li);
     });
   }
-  
+
   filterAddedJobs() {
     const searchTerm = this.elements.txtSearch.value.toLowerCase();
-    this.displayedAddedJobs = this.addedJobs.filter(job => 
-        (job.JobOfferTitle || '').toLowerCase().includes(searchTerm) ||
-        (job.CompanyName || '').toLowerCase().includes(searchTerm)
+    this.displayedAddedJobs = this.addedJobs.filter(job =>
+      (job.JobOfferTitle || '').toLowerCase().includes(searchTerm) ||
+      (job.CompanyName || '').toLowerCase().includes(searchTerm)
     );
     this.updateAddedJobList();
   }
-  
+
   jumpToJob(jobId) {
+    // Ensure the job ID exists in the main list before jumping
     const jobIndex = this.allJobs.findIndex(job => job.ID === jobId);
     if (jobIndex !== -1) {
-      this.currentIndex = jobIndex;
+      this.currentJobId = jobId; // Set the current ID
       this.updateDisplay();
     }
   }
@@ -123,42 +133,65 @@ class JobViewerApp {
   }
 
   updateDisplay() {
-    if (this.allJobs.length === 0 || this.currentIndex === -1) {
+    // If there's no current ID or no jobs loaded, show empty state
+    if (!this.currentJobId || this.allJobs.length === 0) {
       this.elements.progressText.textContent = `0 / 0`;
       this.elements.progressBar.value = 0;
-      this.toggleNavigation(false);
+      this.toggleNavigation(false, -1);
       return;
     }
-    
-    const job = this.allJobs[this.currentIndex];
+
+    // Find the current job and its index using the currentJobId
+    const currentIndex = this.allJobs.findIndex(j => j.ID === this.currentJobId);
+    if (currentIndex === -1) {
+        console.error("Could not find job with ID:", this.currentJobId);
+        // Optionally reset to the first job or show an error
+        this.currentJobId = this.allJobs.length > 0 ? this.allJobs[0].ID : null;
+        this.updateDisplay();
+        return;
+    }
+    const job = this.allJobs[currentIndex];
+
+    // Update UI elements
     this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
     this.elements.lblCompany.textContent = `Company: ${job.CompanyName || 'Not specified'}`;
     this.elements.txtDescription.textContent = job.Description || 'No description available';
-    const isAdded = this.addedJobs.some(j => j.ID === job.ID);
     
+    // Check if the current job has been added
+    const isAdded = this.addedJobs.some(j => j.ID === this.currentJobId);
+
     const hasLink = job.Link && job.Link.trim() !== '';
     this.elements.btnApply.classList.toggle('hidden', !hasLink);
-    if(hasLink) this.elements.btnApply.href = job.Link;
-    
+    if (hasLink) this.elements.btnApply.href = job.Link;
+
+    // Update progress bar and navigation using the found index
     this.elements.progressBar.max = this.allJobs.length;
-    this.elements.progressBar.value = this.currentIndex + 1;
-    this.elements.progressText.textContent = `${this.currentIndex + 1} / ${this.allJobs.length}`;
-    document.title = `Job Viewer (${this.currentIndex + 1}/${this.allJobs.length})`;
-    this.toggleNavigation(true);
+    this.elements.progressBar.value = currentIndex + 1;
+    this.elements.progressText.textContent = `${currentIndex + 1} / ${this.allJobs.length}`;
+    document.title = `Job Viewer (${currentIndex + 1}/${this.allJobs.length})`;
+
+    this.toggleNavigation(true, currentIndex);
     this.showButtons(isAdded);
   }
 
-  toggleNavigation(enabled) {
-    this.elements.btnPrev.disabled = !enabled || this.currentIndex <= 0;
-    this.elements.btnNext.disabled = !enabled || this.currentIndex >= this.allJobs.length - 1;
+  toggleNavigation(enabled, currentIndex) {
+    this.elements.btnPrev.disabled = !enabled || currentIndex <= 0;
+    this.elements.btnNext.disabled = !enabled || currentIndex >= this.allJobs.length - 1;
     this.elements.btnAddJob.disabled = !enabled;
     this.elements.btnDeleteJob.disabled = !enabled;
   }
 
   navigateJobs(direction) {
-    const newIndex = this.currentIndex + direction;
+    if (!this.currentJobId) return;
+
+    // Find the index of the current job
+    const currentIndex = this.allJobs.findIndex(j => j.ID === this.currentJobId);
+    const newIndex = currentIndex + direction;
+
+    // Check if the new index is within the bounds of the jobs array
     if (newIndex >= 0 && newIndex < this.allJobs.length) {
-      this.currentIndex = newIndex;
+      // Update the currentJobId to the ID of the next/previous job
+      this.currentJobId = this.allJobs[newIndex].ID;
       this.updateDisplay();
     }
   }
@@ -170,7 +203,7 @@ class JobViewerApp {
       this.updateFonts();
     }
   }
-  
+
   updateFonts() {
     document.body.style.fontSize = `${this.fontSize}px`;
     this.elements.lblFontSize.textContent = `Font: ${this.fontSize}pt`;
@@ -180,7 +213,6 @@ class JobViewerApp {
   loadSettings() {
     const savedSize = localStorage.getItem('jobViewerFontSize');
     if (savedSize) this.fontSize = parseInt(savedSize, 10);
-    // Could also load added jobs from local storage in the future
   }
 
   saveSettings() {
@@ -188,9 +220,13 @@ class JobViewerApp {
   }
 
   addCurrentJob() {
-    if (this.currentIndex < 0) return;
-    const currentJob = this.allJobs[this.currentIndex];
-    const isAlreadyAdded = this.addedJobs.some(job => job.ID === currentJob.ID);
+    if (!this.currentJobId) return;
+
+    // Find the full job object from the master list
+    const currentJob = this.allJobs.find(j => j.ID === this.currentJobId);
+    if (!currentJob) return;
+
+    const isAlreadyAdded = this.addedJobs.some(job => job.ID === this.currentJobId);
     if (!isAlreadyAdded) {
       this.addedJobs.push(currentJob);
       this.filterAddedJobs(); // Refresh the displayed list
@@ -199,15 +235,15 @@ class JobViewerApp {
   }
 
   deleteCurrentJob() {
-    if (this.currentIndex < 0) return;
-    const currentJobId = this.allJobs[this.currentIndex].ID;
-    this.addedJobs = this.addedJobs.filter(job => job.ID !== currentJobId);
+    if (!this.currentJobId) return;
+
+    this.addedJobs = this.addedJobs.filter(job => job.ID !== this.currentJobId);
     this.filterAddedJobs(); // Refresh the displayed list
     this.updateDisplay(); // Update buttons and star icon
   }
 
   exportJson() {
-    if(this.addedJobs.length === 0) {
+    if (this.addedJobs.length === 0) {
       alert("No added jobs to export.");
       return;
     }
@@ -216,7 +252,7 @@ class JobViewerApp {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = "my_selected_jobs.json";
+    a.download = "completed_selecte_jobs.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
