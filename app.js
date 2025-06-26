@@ -93,8 +93,8 @@ class JobViewerApp {
     this.displayedAddedJobs.forEach((job, index) => {
       const li = document.createElement("li");
       li.textContent = `${index + 1}. ${job.JobOfferTitle || 'Untitled'} - ${job.CompanyName || 'Unknown'}`;
-      li.dataset.id = job.Id; // Store job ID for quick lookup
-      li.addEventListener('click', () => this.jumpToJob(job.Id));
+      li.dataset.ID = job.ID; // Store job ID for quick lookup
+      li.addEventListener('click', () => this.jumpToJob(job.ID));
       ul.appendChild(li);
     });
   }
@@ -109,7 +109,7 @@ class JobViewerApp {
   }
   
   jumpToJob(jobId) {
-    const jobIndex = this.allJobs.findIndex(job => job.Id === jobId);
+    const jobIndex = this.allJobs.findIndex(job => job.ID === jobId);
     if (jobIndex !== -1) {
       this.currentIndex = jobIndex;
       this.updateDisplay();
@@ -134,7 +134,7 @@ class JobViewerApp {
     this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
     this.elements.lblCompany.textContent = `Company: ${job.CompanyName || 'Not specified'}`;
     this.elements.txtDescription.textContent = job.Description || 'No description available';
-    const isAdded = this.addedJobs.some(j => j.Id === job.Id);
+    const isAdded = this.addedJobs.some(j => j.ID === job.ID);
     
     const hasLink = job.Link && job.Link.trim() !== '';
     this.elements.btnApply.classList.toggle('hidden', !hasLink);
@@ -190,7 +190,7 @@ class JobViewerApp {
   addCurrentJob() {
     if (this.currentIndex < 0) return;
     const currentJob = this.allJobs[this.currentIndex];
-    const isAlreadyAdded = this.addedJobs.some(job => job.Id === currentJob.Id);
+    const isAlreadyAdded = this.addedJobs.some(job => job.ID === currentJob.ID);
     if (!isAlreadyAdded) {
       this.addedJobs.push(currentJob);
       this.filterAddedJobs(); // Refresh the displayed list
@@ -200,8 +200,8 @@ class JobViewerApp {
 
   deleteCurrentJob() {
     if (this.currentIndex < 0) return;
-    const currentJobId = this.allJobs[this.currentIndex].Id;
-    this.addedJobs = this.addedJobs.filter(job => job.Id !== currentJobId);
+    const currentJobId = this.allJobs[this.currentIndex].ID;
+    this.addedJobs = this.addedJobs.filter(job => job.ID !== currentJobId);
     this.filterAddedJobs(); // Refresh the displayed list
     this.updateDisplay(); // Update buttons and star icon
   }
