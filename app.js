@@ -4,8 +4,8 @@ class JobViewerApp {
     this.allJobs = []; // All jobs from the loaded JSON
     this.addedJobs = []; // Full job objects the user has added
     this.displayedAddedJobs = []; // Jobs visible in the sidebar (after filtering)
-    this.currentJobId = null; // Use job ID to track the current job instead of index
-    this.fontSize = 20;
+    this.currentJobId = null; // Use job ID to track the current job
+    this.fontSize = 16; // Adjusted default font size for better readability
 
     // --- HELPERS ---
     this.filterTimer = null;
@@ -25,12 +25,15 @@ class JobViewerApp {
       lblFontSize: document.getElementById('lblFontSize'),
       placeholder: document.getElementById('placeholder'),
       jobContent: document.getElementById('jobContent'),
-      lblTitle: document.getElementById('lblTitle'),
       titleText: document.getElementById('titleText'),
       addedIcon: document.getElementById('addedIcon'),
       lblCompany: document.getElementById('lblCompany'),
       lblSalary: document.getElementById('lblSalary'),
-      txtDescription: document.getElementById('txtDescription'),
+      txtSummary: document.getElementById('txtSummary'),
+      keySkillsList: document.getElementById('keySkillsList'),
+      essentialQualificationsList: document.getElementById('essentialQualificationsList'),
+      essentialTechSkillsList: document.getElementById('essentialTechSkillsList'),
+      otherTechSkillsList: document.getElementById('otherTechSkillsList'),
       btnApply: document.getElementById('btnApply'),
       btnPrev: document.getElementById('btnPrev'),
       btnNext: document.getElementById('btnNext'),
@@ -70,13 +73,12 @@ class JobViewerApp {
     reader.onload = event => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!Array.isArray(data) || (data.length > 0 && typeof data[0].ID === 'undefined')) {
-          throw new Error("JSON must be an array of objects, and each object must have a unique 'ID' property.");
+        if (!Array.isArray(data) || (data.length > 0 && typeof data[0].Id === 'undefined')) {
+          throw new Error("JSON must be an array of objects, and each object must have a unique 'Id' property.");
         }
 
         this.allJobs = data;
-        // Set the current job to the ID of the first job, or null if empty
-        this.currentJobId = data.length > 0 ? data[0].ID : null;
+        this.currentJobId = data.length > 0 ? data[0].Id : null;
 
         if (this.currentJobId !== null) {
           this.elements.placeholder.classList.add('hidden');
@@ -101,9 +103,9 @@ class JobViewerApp {
     ul.innerHTML = ""; // Clear existing list
     this.displayedAddedJobs.forEach((job, index) => {
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${job.JobOfferTitle || 'Untitled'} - ${job.CompanyName || 'Unknown'}`;
-      li.dataset.ID = job.ID; // Store job ID for quick lookup
-      li.addEventListener('click', () => this.jumpToJob(job.ID));
+      li.textContent = `${index + 1}. ${job['Job Offer Title'] || 'Untitled'} - ${job['Company Name'] || 'Unknown'}`;
+      li.dataset.Id = job.Id; // Store job ID for quick lookup
+      li.addEventListener('click', () => this.jumpToJob(job.Id));
       ul.appendChild(li);
     });
   }
@@ -111,17 +113,16 @@ class JobViewerApp {
   filterAddedJobs() {
     const searchTerm = this.elements.txtSearch.value.toLowerCase();
     this.displayedAddedJobs = this.addedJobs.filter(job =>
-      (job.JobOfferTitle || '').toLowerCase().includes(searchTerm) ||
-      (job.CompanyName || '').toLowerCase().includes(searchTerm)
+      (job['Job Offer Title'] || '').toLowerCase().includes(searchTerm) ||
+      (job['Company Name'] || '').toLowerCase().includes(searchTerm)
     );
     this.updateAddedJobList();
   }
 
   jumpToJob(jobId) {
-    // Ensure the job ID exists in the main list before jumping
-    const jobIndex = this.allJobs.findIndex(job => job.ID === jobId);
+    const jobIndex = this.allJobs.findIndex(job => job.Id === jobId);
     if (jobIndex !== -1) {
-      this.currentJobId = jobId; // Set the current ID
+      this.currentJobId = jobId;
       this.updateDisplay();
     }
   }
@@ -132,8 +133,21 @@ class JobViewerApp {
     this.elements.btnAddJob.classList.toggle('hidden', isAdded);
   }
 
+  populateList(element, items, tagClass) {
+    element.innerHTML = '';
+    if (items && items.length > 0) {
+      items.forEach(itemText => {
+        const li = document.createElement('li');
+        if (tagClass) {
+          li.className = tagClass;
+        }
+        li.textContent = itemText;
+        element.appendChild(li);
+      });
+    }
+  }
+
   updateDisplay() {
-    // If there's no current ID or no jobs loaded, show empty state
     if (!this.currentJobId || this.allJobs.length === 0) {
       this.elements.progressText.textContent = `0 / 0`;
       this.elements.progressBar.value = 0;
@@ -141,30 +155,30 @@ class JobViewerApp {
       return;
     }
 
-    // Find the current job and its index using the currentJobId
-    const currentIndex = this.allJobs.findIndex(j => j.ID === this.currentJobId);
+    const currentIndex = this.allJobs.findIndex(j => j.Id === this.currentJobId);
     if (currentIndex === -1) {
-        console.error("Could not find job with ID:", this.currentJobId);
-        // Optionally reset to the first job or show an error
-        this.currentJobId = this.allJobs.length > 0 ? this.allJobs[0].ID : null;
-        this.updateDisplay();
-        return;
+      console.error("Could not find job with ID:", this.currentJobId);
+      this.currentJobId = this.allJobs.length > 0 ? this.allJobs[0].Id : null;
+      this.updateDisplay();
+      return;
     }
     const job = this.allJobs[currentIndex];
 
-    // Update UI elements
-    this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
-    this.elements.lblCompany.textContent = `Company: ${job.CompanyName || 'Not specified'}`;
-    this.elements.txtDescription.textContent = job.Description || 'No description available';
+    this.elements.titleText.textContent = job['Job Offer Title'] || 'No title';
+    this.elements.lblCompany.textContent = job['Company Name'] || 'Not specified';
+    this.elements.lblSalary.textContent = job['Salary or Budget Offered'] || 'Not specified';
+    this.elements.txtSummary.textContent = job['Job Offer Summarize'] || 'No summary available.';
     
-    // Check if the current job has been added
-    const isAdded = this.addedJobs.some(j => j.ID === this.currentJobId);
+    this.populateList(this.elements.keySkillsList, job['Key Skills Required'], 'skill-tag');
+    this.populateList(this.elements.essentialQualificationsList, job['Essential Qualifications']);
+    this.populateList(this.elements.essentialTechSkillsList, job['Essential Technical Skill Qualifications']);
+    this.populateList(this.elements.otherTechSkillsList, job['Other Technical Skill Qualifications']);
 
-    const hasLink = job.Link && job.Link.trim() !== '';
+    const isAdded = this.addedJobs.some(j => j.Id === this.currentJobId);
+    const hasLink = job.Url && job.Url.trim() !== '';
     this.elements.btnApply.classList.toggle('hidden', !hasLink);
-    if (hasLink) this.elements.btnApply.href = job.Link;
+    if (hasLink) this.elements.btnApply.href = job.Url;
 
-    // Update progress bar and navigation using the found index
     this.elements.progressBar.max = this.allJobs.length;
     this.elements.progressBar.value = currentIndex + 1;
     this.elements.progressText.textContent = `${currentIndex + 1} / ${this.allJobs.length}`;
@@ -184,29 +198,26 @@ class JobViewerApp {
   navigateJobs(direction) {
     if (!this.currentJobId) return;
 
-    // Find the index of the current job
-    const currentIndex = this.allJobs.findIndex(j => j.ID === this.currentJobId);
+    const currentIndex = this.allJobs.findIndex(j => j.Id === this.currentJobId);
     const newIndex = currentIndex + direction;
 
-    // Check if the new index is within the bounds of the jobs array
     if (newIndex >= 0 && newIndex < this.allJobs.length) {
-      // Update the currentJobId to the ID of the next/previous job
-      this.currentJobId = this.allJobs[newIndex].ID;
+      this.currentJobId = this.allJobs[newIndex].Id;
       this.updateDisplay();
     }
   }
 
   changeFontSize(delta) {
     const newSize = this.fontSize + delta;
-    if (newSize >= 10 && newSize <= 28) {
+    if (newSize >= 12 && newSize <= 28) {
       this.fontSize = newSize;
       this.updateFonts();
     }
   }
 
   updateFonts() {
-    document.body.style.fontSize = `${this.fontSize}px`;
-    this.elements.lblFontSize.textContent = `Font: ${this.fontSize}pt`;
+    document.documentElement.style.fontSize = `${this.fontSize}px`;
+    this.elements.lblFontSize.textContent = `Font: ${this.fontSize}px`;
     this.saveSettings();
   }
 
@@ -222,24 +233,23 @@ class JobViewerApp {
   addCurrentJob() {
     if (!this.currentJobId) return;
 
-    // Find the full job object from the master list
-    const currentJob = this.allJobs.find(j => j.ID === this.currentJobId);
+    const currentJob = this.allJobs.find(j => j.Id === this.currentJobId);
     if (!currentJob) return;
 
-    const isAlreadyAdded = this.addedJobs.some(job => job.ID === this.currentJobId);
+    const isAlreadyAdded = this.addedJobs.some(job => job.Id === this.currentJobId);
     if (!isAlreadyAdded) {
       this.addedJobs.push(currentJob);
-      this.filterAddedJobs(); // Refresh the displayed list
-      this.updateDisplay(); // Update buttons and star icon
+      this.filterAddedJobs();
+      this.updateDisplay();
     }
   }
 
   deleteCurrentJob() {
     if (!this.currentJobId) return;
 
-    this.addedJobs = this.addedJobs.filter(job => job.ID !== this.currentJobId);
-    this.filterAddedJobs(); // Refresh the displayed list
-    this.updateDisplay(); // Update buttons and star icon
+    this.addedJobs = this.addedJobs.filter(job => job.Id !== this.currentJobId);
+    this.filterAddedJobs();
+    this.updateDisplay();
   }
 
   exportJson() {
@@ -252,7 +262,7 @@ class JobViewerApp {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = "completed_selecte_jobs.json";
+    a.download = "selected_jobs.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

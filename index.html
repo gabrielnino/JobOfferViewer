@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Job Offer Viewer</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="app.js"></script>
 </head>
 <body>
   <div class="container">
@@ -16,19 +15,19 @@
       </div>
       <div class="control-group">
         <button id="btnDecreaseFont" aria-label="Decrease Font Size">A-</button>
-        <div id="lblFontSize" class="font-size-label">Font: 20pt</div>
+        <span id="lblFontSize" class="font-size-label">Font: 16px</span>
         <button id="btnIncreaseFont" aria-label="Increase Font Size">A+</button>
       </div>
       <div class="control-group">
-        <button id="btnExportJson">📤 Export JSON</button>
+        <button id="btnExportJson">📤 Export Selected</button>
       </div>
     </header>
     
     <main class="main-layout">
       <aside class="added-jobs">
-        <h3>Added Job Offers</h3>
+        <h3>Selected Jobs</h3>
         <div class="search-wrapper">
-          <input type="text" id="txtSearch" placeholder="Filter added jobs...">
+          <input type="text" id="txtSearch" placeholder="Filter selected jobs...">
         </div>
         <ul id="addedJobList"></ul>
       </aside>
@@ -40,16 +39,37 @@
             <p>Please load a JSON file to begin viewing job offers.</p>
           </div>
           <div id="jobContent" class="hidden">
-            <div class="job-header">
-              <h2 id="lblTitle" class="job-title">
+            <header class="job-header">
+              <h2 class="job-title">
                 <span id="addedIcon" class="icon hidden" title="This job has been added">⭐</span>
                 <span id="titleText"></span>
               </h2>
               <div id="lblCompany" class="job-company"></div>
+              <div id="lblSalary" class="job-salary"></div>
+            </header>
+
+            <p id="txtSummary" class="job-summary"></p>
+            
+            <a id="btnApply" class="btn-apply hidden" href="#" target="_blank" rel="noopener noreferrer">Apply Now 🚀</a>
+
+            <div class="details-grid">
+              <div class="detail-card">
+                <h4>Key Skills</h4>
+                <ul id="keySkillsList" class="skill-list"></ul>
+              </div>
+              <div class="detail-card">
+                <h4>Essential Qualifications</h4>
+                <ul id="essentialQualificationsList" class="qualifications-list"></ul>
+              </div>
+              <div class="detail-card">
+                <h4>Essential Technical Skills</h4>
+                <ul id="essentialTechSkillsList" class="qualifications-list"></ul>
+              </div>
+              <div class="detail-card">
+                <h4>Other Technical Skills</h4>
+                <ul id="otherTechSkillsList" class="qualifications-list"></ul>
+              </div>
             </div>
-            <div id="lblSalary" class="job-salary"></div>
-            <div id="txtDescription" class="job-description"></div>
-            <a id="btnApply" class="btn-apply hidden" href="#" target="_blank" rel="noopener noreferrer">Apply Now</a>
           </div>
         </div>
         
@@ -63,12 +83,13 @@
             <button id="btnNext">Next ▶</button>
           </div>
           <div class="job-actions">
-            <button id="btnAddJob">➕ Add Job</button>
-            <button id="btnDeleteJob" class="btn-delete">🗑️ Delete Job</button>
+            <button id="btnAddJob">⭐ Select Job</button>
+            <button id="btnDeleteJob" class="btn-delete">🗑️ Unselect</button>
           </div>
         </footer>
       </section>
     </main>
   </div>
+  <script src="app.js"></script>
 </body>
 </html>
