@@ -46,6 +46,7 @@ class JobViewerApp {
       txtSearch: document.getElementById('txtSearch'),
       btnLoadResume: document.getElementById('btnLoadResume'),
       resumeInput: document.getElementById('resumeInput'),
+      rawDescriptionContent: document.getElementById('rawDescriptionContent')
     };
 
     // Bind all event listeners
@@ -61,6 +62,9 @@ class JobViewerApp {
     this.elements.txtSearch.addEventListener('input', () => this.filterAddedJobs());
     this.elements.btnLoadResume.addEventListener('click', () => this.elements.resumeInput.click());
     this.elements.resumeInput.addEventListener('change', (e) => this.handleResumeChange(e));
+    this.elements.detailsRaw = document.getElementById('jobRawDescription');
+    this.elements.detailsRaw.addEventListener('toggle', () => { console.log(`Raw job description is now ${this.elements.detailsRaw.open ? 'open' : 'closed'}`); });
+
 
     // Initial UI state
     this.elements.btnAddJob.classList.add('hidden');
@@ -173,9 +177,11 @@ class JobViewerApp {
   }
 
   updateDisplay() {
+    console.log('Write updateDisplay');
     if (!this.currentJobId || this.allJobs.length === 0) {
       this.elements.progressText.textContent = `0 / 0`;
       this.elements.progressBar.value = 0;
+      console.log('Job is found');
       this.toggleNavigation(false, -1);
       return;
     }
@@ -193,6 +199,16 @@ class JobViewerApp {
     this.elements.lblCompany.textContent = job.CompanyName || 'Not specified';
     this.elements.lblSalary.textContent = job.SalaryOrBudgetOffered || 'Not specified';
     this.elements.txtSummary.textContent = job.JobOfferSummarize || 'No summary available.';
+
+    if (Array.isArray(job.RawJobDescription)) {
+      this.elements.rawDescriptionContent.innerHTML = job.RawJobDescription
+        .map(line => `<p>${line}</p>`)
+        .join('');
+      console.log('rawDescriptionContent successfully');
+    } else {
+      this.elements.rawDescriptionContent.innerHTML = '<p>No additional description available.</p>';
+      console.log('rawDescriptionContent faiuled');
+    }
 
     this.populateList(this.elements.keySkillsList, job.KeySkillsRequired, 'skill-tag');
     this.populateList(this.elements.essentialQualificationsList, job.EssentialQualifications);

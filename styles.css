@@ -224,3 +224,25 @@ color: var(--bg-color);
 background-color: #fdd34d;
 border-color: #fdd34d;
 }
+
+.job-raw-description {
+  margin-top: 2rem;
+  background-color: var(--tertiary-bg-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  font-size: 0.95rem;
+}
+
+.job-raw-description summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.75rem;
+}
+
+.job-raw-description div {
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  color: var(--text-muted-color);
+}
