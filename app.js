@@ -6,7 +6,7 @@ class JobViewerApp {
     this.displayedAddedJobs = []; // Jobs visible in the sidebar (after filtering)
     this.currentJobId = null; // Use job ID to track the current job
     this.fontSize = 16; // Adjusted default font size for better readability
-
+    this.resumeData = null; // Store resume data
     // --- HELPERS ---
     this.filterTimer = null;
 
@@ -44,6 +44,8 @@ class JobViewerApp {
       btnExportJson: document.getElementById('btnExportJson'),
       addedJobList: document.getElementById('addedJobList'),
       txtSearch: document.getElementById('txtSearch'),
+      btnLoadResume: document.getElementById('btnLoadResume'),
+      resumeInput: document.getElementById('resumeInput'),
     };
 
     // Bind all event listeners
@@ -57,6 +59,8 @@ class JobViewerApp {
     this.elements.btnDeleteJob.addEventListener('click', () => this.deleteCurrentJob());
     this.elements.btnExportJson.addEventListener('click', () => this.exportJson());
     this.elements.txtSearch.addEventListener('input', () => this.filterAddedJobs());
+    this.elements.btnLoadResume.addEventListener('click', () => this.elements.resumeInput.click());
+    this.elements.resumeInput.addEventListener('change', (e) => this.handleResumeChange(e));
 
     // Initial UI state
     this.elements.btnAddJob.classList.add('hidden');
@@ -65,10 +69,29 @@ class JobViewerApp {
     this.updateFonts();
   }
 
+  handleResumeChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        this.resumeData = JSON.parse(event.target.result);
+        console.log('Resume loaded successfully');
+
+        // Update display if we have a job loaded
+        if (this.currentJobId) {
+          this.updateDisplay();
+        }
+      } catch (error) {
+        alert(`Failed to load resume: ${error.message}`);
+      }
+    };
+    reader.onerror = () => alert(`Error reading file: ${reader.error}`);
+    reader.readAsText(file);
+  }
   handleFileChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = event => {
       try {
@@ -135,13 +158,15 @@ class JobViewerApp {
 
   populateList(element, items, tagClass) {
     element.innerHTML = '';
-    if (items && items.length > 0) {
-      items.forEach(itemText => {
+    if (Array.isArray(items) && items.length > 0) {
+      items.forEach(item => {
         const li = document.createElement('li');
-        if (tagClass) {
-          li.className = tagClass;
+        if (tagClass) li.className = tagClass;
+        if (typeof item === 'string') {
+          li.textContent = item;
+        } else if (typeof item === 'object' && item.Name) {
+          li.textContent = `${item.Name}${item.RelevancePercentage ? ` (${item.RelevancePercentage}%)` : ''}`;
         }
-        li.textContent = itemText;
         element.appendChild(li);
       });
     }
@@ -164,15 +189,16 @@ class JobViewerApp {
     }
     const job = this.allJobs[currentIndex];
 
-    this.elements.titleText.textContent = job['Job Offer Title'] || 'No title';
-    this.elements.lblCompany.textContent = job['Company Name'] || 'Not specified';
-    this.elements.lblSalary.textContent = job['Salary or Budget Offered'] || 'Not specified';
-    this.elements.txtSummary.textContent = job['Job Offer Summarize'] || 'No summary available.';
-    
-    this.populateList(this.elements.keySkillsList, job['Key Skills Required'], 'skill-tag');
-    this.populateList(this.elements.essentialQualificationsList, job['Essential Qualifications']);
-    this.populateList(this.elements.essentialTechSkillsList, job['Essential Technical Skill Qualifications']);
-    this.populateList(this.elements.otherTechSkillsList, job['Other Technical Skill Qualifications']);
+    this.elements.titleText.textContent = job.JobOfferTitle || 'No title';
+    this.elements.lblCompany.textContent = job.CompanyName || 'Not specified';
+    this.elements.lblSalary.textContent = job.SalaryOrBudgetOffered || 'Not specified';
+    this.elements.txtSummary.textContent = job.JobOfferSummarize || 'No summary available.';
+
+    this.populateList(this.elements.keySkillsList, job.KeySkillsRequired, 'skill-tag');
+    this.populateList(this.elements.essentialQualificationsList, job.EssentialQualifications);
+    this.populateList(this.elements.essentialTechSkillsList, job.EssentialTechnicalSkillQualifications);
+    this.populateList(this.elements.otherTechSkillsList, job.OtherTechnicalSkillQualifications);
+
 
     const isAdded = this.addedJobs.some(j => j.Id === this.currentJobId);
     const hasLink = job.Url && job.Url.trim() !== '';
@@ -186,6 +212,33 @@ class JobViewerApp {
 
     this.toggleNavigation(true, currentIndex);
     this.showButtons(isAdded);
+
+    // Update match percentage if resume is loaded
+    if (this.resumeData) {
+      console.log('Resume ready, calculating match percentage...');
+      const percentage = this.calculateMatchPercentage(job);
+      this.updateGauge(percentage);
+    }
+  }
+
+  calculateMatchPercentage(job) {
+    if (!this.resumeData || !Array.isArray(job.Skills)) return 0;
+
+    let total = 0;
+    job.Skills.forEach(skill => {
+      const resumeScore = this.resumeData[skill.category] || 0;
+      total += skill.relevance * (resumeScore / 100);
+    });
+
+    return Math.min(Math.round(total), 100);
+  }
+
+  updateGauge(percentage) {
+    const circumference = 339.292;
+    const offset = circumference - (percentage / 100) * circumference;
+    document.querySelector('.gauge-arc').style.strokeDashoffset = offset;
+    document.querySelector('.gauge-text').textContent = `${percentage}%`;
+    console.log(`percentage ${percentage}%`);
   }
 
   toggleNavigation(enabled, currentIndex) {
@@ -197,7 +250,6 @@ class JobViewerApp {
 
   navigateJobs(direction) {
     if (!this.currentJobId) return;
-
     const currentIndex = this.allJobs.findIndex(j => j.Id === this.currentJobId);
     const newIndex = currentIndex + direction;
 
@@ -217,7 +269,7 @@ class JobViewerApp {
 
   updateFonts() {
     document.documentElement.style.fontSize = `${this.fontSize}px`;
-    this.elements.lblFontSize.textContent = `Font: ${this.fontSize}px`;
+    this.elements.lblFontSize.textContent = `Font: ${this.fontSize}px`
     this.saveSettings();
   }
 
@@ -246,10 +298,10 @@ class JobViewerApp {
 
   deleteCurrentJob() {
     if (!this.currentJobId) return;
-
     this.addedJobs = this.addedJobs.filter(job => job.Id !== this.currentJobId);
     this.filterAddedJobs();
     this.updateDisplay();
+
   }
 
   exportJson() {

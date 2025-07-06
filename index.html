@@ -12,6 +12,8 @@
       <div class="control-group">
         <button id="btnLoad">📂 Load JSON File</button>
         <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button id="btnLoadResume">👤 Load Resume</button> 
+        <input type="file" id="resumeInput" accept=".json" style="display: none;">
       </div>
       <div class="control-group">
         <button id="btnDecreaseFont" aria-label="Decrease Font Size">A-</button>
@@ -22,7 +24,6 @@
         <button id="btnExportJson">📤 Export Selected</button>
       </div>
     </header>
-    
     <main class="main-layout">
       <aside class="added-jobs">
         <h3>Selected Jobs</h3>
@@ -31,7 +32,6 @@
         </div>
         <ul id="addedJobList"></ul>
       </aside>
-      
       <section class="main-content">
         <div class="job-display">
           <div id="placeholder" class="placeholder">
@@ -39,6 +39,14 @@
             <p>Please load a JSON file to begin viewing job offers.</p>
           </div>
           <div id="jobContent" class="hidden">
+            <div class="match-gauge">
+              <svg class="gauge" viewBox="0 0 120 120">
+                <circle class="gauge-background" cx="60" cy="60" r="54" stroke-width="12"></circle>
+                <circle class="gauge-arc" cx="60" cy="60" r="54" stroke-width="12" stroke-dasharray="339.292" stroke-dashoffset="339.292"></circle>
+                <text class="gauge-text" x="60" y="65" text-anchor="middle">0%</text>
+              </svg>
+              <div class="gauge-label">Match</div>
+            </div>
             <header class="job-header">
               <h2 class="job-title">
                 <span id="addedIcon" class="icon hidden" title="This job has been added">⭐</span>
@@ -47,11 +55,8 @@
               <div id="lblCompany" class="job-company"></div>
               <div id="lblSalary" class="job-salary"></div>
             </header>
-
             <p id="txtSummary" class="job-summary"></p>
-            
             <a id="btnApply" class="btn-apply hidden" href="#" target="_blank" rel="noopener noreferrer">Apply Now 🚀</a>
-
             <div class="details-grid">
               <div class="detail-card">
                 <h4>Key Skills</h4>
@@ -72,7 +77,6 @@
             </div>
           </div>
         </div>
-        
         <footer class="job-footer">
           <div class="navigation">
             <button id="btnPrev">◀ Previous</button>
