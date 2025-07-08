@@ -230,30 +230,40 @@ class JobViewerApp {
     this.showButtons(isAdded);
 
     // Update match percentage if resume is loaded
+
     if (this.resumeData) {
-      console.log('Resume ready, calculating match percentage...');
-      const percentage = this.calculateMatchPercentage(job);
-      this.updateGauge(percentage);
+    console.log('Resume ready, calculating match percentage...');
+    const percentage = this.calculateMatchPercentage(job);
+    this.updateGauge(percentage, '.gauge-arc', '.gauge-text');
+    }
+
+    // Update AI Fit Score if available
+    if (job.AiFitScore !== undefined) {
+      console.log('AiFitScore ready, updating AI gauge...', job.AiFitScore);
+      this.updateGauge(job.AiFitScore, '.ai-gauge-arc', '.ai-gauge-text');
     }
   }
 
   calculateMatchPercentage(job) {
     if (!this.resumeData || !Array.isArray(job.Skills)) return 0;
-
+    console.log('Calculate match percentage by skills...', job.Skills);
     let total = 0;
     job.Skills.forEach(skill => {
-      const resumeScore = this.resumeData[skill.category] || 0;
-      total += skill.relevance * (resumeScore / 100);
+      const resumeScore = this.resumeData[skill.Category] || 0;
+      console.log('ResumeScore...', resumeScore);
+      total += skill.Relevance * (resumeScore / 100);
     });
-
-    return Math.min(Math.round(total), 100);
+    console.log('Calculate match percentage by total...', total);
+    let percentage = Math.min(Math.round(total), 100);
+    console.log('Calculate match percentage by percentage...', percentage);
+    return percentage;
   }
 
-  updateGauge(percentage) {
+  updateGauge(percentage, arcSelector, textSelector) {
     const circumference = 339.292;
     const offset = circumference - (percentage / 100) * circumference;
-    document.querySelector('.gauge-arc').style.strokeDashoffset = offset;
-    document.querySelector('.gauge-text').textContent = `${percentage}%`;
+    document.querySelector(arcSelector).style.strokeDashoffset = offset;
+    document.querySelector(textSelector).textContent = `${percentage}%`;
     console.log(`percentage ${percentage}%`);
   }
 

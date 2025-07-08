@@ -246,3 +246,25 @@ border-color: #fdd34d;
   white-space: pre-wrap;
   color: var(--text-muted-color);
 }
+
+.ai-gauge-arc {
+  fill: none;
+  stroke: #34a853; /* Green color for AI gauge */
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.ai-gauge-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  fill: var(--text-color);
+  transform: rotate(90deg);
+  transform-origin: 60px 60px;
+}
+
+.match-gauge-container {
+  display: flex;
+  gap: 2rem;
+  margin: 1rem 0 2rem;
+  justify-content: center;
+}
