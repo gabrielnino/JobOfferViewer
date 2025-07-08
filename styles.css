@@ -147,7 +147,6 @@ border-radius: var(--border-radius);
 box-shadow: var(--box-shadow);
 border: 1px solid var(--border-color);
 overflow: hidden;
-height: calc(100vh - 100px);
 }
 
 .added-jobs {
@@ -158,7 +157,6 @@ padding: 1rem;
 border-radius: var(--border-radius);
 box-shadow: var(--box-shadow);
 border: 1px solid var(--border-color);
-height: calc(100vh - 100px);
 display: flex;
 flex-direction: column;
 }
@@ -202,7 +200,12 @@ progress::-webkit-progress-value { background-color: var(--primary-color); trans
 .hidden { display: none !important; }
 
 @media (max-width: 1200px) {
-.main-layout { flex-direction: column; }
+.main-layout { 
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  flex-direction: column; 
+}
 .added-jobs, .main-content { width: 100%; height: auto; max-height: 50vh; }
 }
 @media (max-width: 768px) {
