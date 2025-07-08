@@ -226,7 +226,6 @@ border-color: #fdd34d;
 }
 
 .job-raw-description {
-  margin-top: 2rem;
   background-color: var(--tertiary-bg-color);
   padding: 1rem;
   border-radius: var(--border-radius);
@@ -267,4 +266,8 @@ border-color: #fdd34d;
   gap: 2rem;
   margin: 1rem 0 2rem;
   justify-content: center;
+}
+
+.job-raw-description {
+  grid-column: span 2;
 }
