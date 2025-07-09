@@ -274,3 +274,19 @@ border-color: #fdd34d;
 .job-raw-description {
   grid-column: span 2;
 }
+.job-detail-collapsible summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.job-detail-collapsible[open] {
+  background-color: var(--tertiary-bg-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
