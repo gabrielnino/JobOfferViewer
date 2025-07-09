@@ -236,12 +236,6 @@ class JobViewerApp {
     const percentage = this.calculateMatchPercentage(job);
     this.updateGauge(percentage, '.gauge-arc', '.gauge-text');
     }
-
-    // Update AI Fit Score if available
-    if (job.AiFitScore !== undefined) {
-      console.log('AiFitScore ready, updating AI gauge...', job.AiFitScore);
-      this.updateGauge(job.AiFitScore, '.ai-gauge-arc', '.ai-gauge-text');
-    }
   }
 
   calculateMatchPercentage(job) {

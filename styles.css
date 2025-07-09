@@ -55,7 +55,7 @@ stroke: var(--tertiary-bg-color);
 
 .gauge-arc {
 fill: none;
-stroke: var(--primary-color);
+stroke: #34a853;
 stroke-linecap: round;
 transition: stroke-dashoffset 0.5s ease;
 }
@@ -180,6 +180,7 @@ flex-direction: column;
 .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 .detail-card { background-color: var(--tertiary-bg-color); padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); }
 .detail-card h4 { margin-top: 0; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; font-size: 1rem; }
+.detail-card-key { background-color: var(--tertiary-bg-color); padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); grid-column: span 3;}
 .skill-list, .qualifications-list { list-style: none; padding: 0; margin: 0; }
 
 .skill-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -267,12 +268,11 @@ border-color: #fdd34d;
 .match-gauge-container {
   display: flex;
   gap: 2rem;
-  margin: 1rem 0 2rem;
   justify-content: center;
 }
 
 .job-raw-description {
-  grid-column: span 2;
+  grid-column: span 3;
 }
 .job-detail-collapsible summary {
   cursor: pointer;
